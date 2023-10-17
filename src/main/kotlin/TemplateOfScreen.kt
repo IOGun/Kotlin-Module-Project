@@ -1,15 +1,14 @@
-
 import java.util.Scanner
 
 class Archive(val name: String, var listOfNotes: MutableList<Note>)
 
-data class Note(val text: String)
+data class Note(val name: String, val text: String)
 
 class ItemOfMenu(val name: String,
                  val menuFunc: () -> Boolean
 )
 
-open class TemplateOfScreen{
+abstract class TemplateOfScreen {
 
     open val messagesOfScreen = mutableMapOf(
             "title_of_screen" to "\n Список архивов:",
@@ -20,49 +19,42 @@ open class TemplateOfScreen{
 
     var listOfMenuItems: MutableList<ItemOfMenu> = mutableListOf()
 
-    open fun createListOfMenu() {
-
-    }
+    abstract fun createListOfMenu()
 
     fun showScreen() {
         println(messagesOfScreen["title_of_screen"])
         createListOfMenu()
-        var i: Int = 0
-        for (row in listOfMenuItems){
-            println("${i}. ${row.name}")
-            i++
-        }
+        listOfMenuItems.forEachIndexed { index, row -> println("${index}. ${row.name}") }
         println(messagesOfScreen["text_message"])
         print("Выберите пункт меню > ")
     }
 
     fun checkItemOfMenu(str: String): Int {
-        if (str.toIntOrNull()==null) {
+        return if (str.toIntOrNull() == null) {
             println("Ошибка ввода! Введите число")
-            return -1
+            -1
         } else {
             val numOfMenuItems: Int = listOfMenuItems.size
             val menuItem: Int = str.toInt()
-            if ( (menuItem > (numOfMenuItems - 1)) or (menuItem < 0)){
+            if ((menuItem > (numOfMenuItems - 1)) or (menuItem < 0)) {
                 println("Данный пункт в меню отсутствует! Выберите другой")
-                return -1
+                -1
             } else {
-                return menuItem
+                menuItem
             }
         }
     }
 
     fun chooseItemOfMenu(item: Int): Boolean {
-        val result = listOfMenuItems[item].menuFunc.invoke()
-        return result
+        return listOfMenuItems[item].menuFunc.invoke()
     }
 
     fun exitFromThisScreen() {
         println(messagesOfScreen["exit_message"])
     }
 
-    fun createScreen(screen: TemplateOfScreen){
-        while (true){
+    fun createScreen(screen: TemplateOfScreen) {
+        while (true) {
             screen.showScreen()
             val str = Scanner(System.`in`).nextLine()
             val itemOfMenu: Int = screen.checkItemOfMenu(str)
